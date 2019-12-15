@@ -1,2 +1,3 @@
-Основной код в файле Form1.cs
+Основной код в файле Form1.cs.
+
 Описание интерфейса в файле InterfaceDescription.doc
