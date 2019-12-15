@@ -1,0 +1,12 @@
+C:\Users\Lenovo\Desktop\ProjectCodes\LinkerVS\VS_Prototype_v0\VS_Prototype_v0\obj\Debug\VS_Prototype_v0.csprojAssemblyReference.cache
+C:\Users\Lenovo\Desktop\ProjectCodes\LinkerVS\VS_Prototype_v0\VS_Prototype_v0\obj\Debug\VS_Prototype_v0.Form1.resources
+C:\Users\Lenovo\Desktop\ProjectCodes\LinkerVS\VS_Prototype_v0\VS_Prototype_v0\obj\Debug\VS_Prototype_v0.Properties.Resources.resources
+C:\Users\Lenovo\Desktop\ProjectCodes\LinkerVS\VS_Prototype_v0\VS_Prototype_v0\obj\Debug\VS_Prototype_v0.csproj.GenerateResource.cache
+C:\Users\Lenovo\Desktop\ProjectCodes\LinkerVS\VS_Prototype_v0\VS_Prototype_v0\obj\Debug\VS_Prototype_v0.csproj.CoreCompileInputs.cache
+C:\Users\Lenovo\Desktop\ProjectCodes\LinkerVS\VS_Prototype_v0\VS_Prototype_v0\bin\Debug\VS_Prototype_v0.exe.config
+C:\Users\Lenovo\Desktop\ProjectCodes\LinkerVS\VS_Prototype_v0\VS_Prototype_v0\bin\Debug\VS_Prototype_v0.exe
+C:\Users\Lenovo\Desktop\ProjectCodes\LinkerVS\VS_Prototype_v0\VS_Prototype_v0\bin\Debug\VS_Prototype_v0.pdb
+C:\Users\Lenovo\Desktop\ProjectCodes\LinkerVS\VS_Prototype_v0\VS_Prototype_v0\obj\Debug\VS_Prototype_v0.exe
+C:\Users\Lenovo\Desktop\ProjectCodes\LinkerVS\VS_Prototype_v0\VS_Prototype_v0\obj\Debug\VS_Prototype_v0.pdb
+C:\Users\Lenovo\Desktop\ProjectCodes\LinkerVS\VS_Prototype_v0\VS_Prototype_v0\bin\Debug\Oracle.ManagedDataAccess.dll
+C:\Users\Lenovo\Desktop\ProjectCodes\LinkerVS\VS_Prototype_v0\VS_Prototype_v0\obj\Debug\VS_Prototype_v0.csproj.CopyComplete
