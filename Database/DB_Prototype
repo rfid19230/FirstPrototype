@@ -1,0 +1,166 @@
+-- однострочные комментарии в Oracle начинаются с "--". многострочные заключаются в "/* */"
+
+/*
+форматирование вывода в БД (длины строки в символах и длины страницы в строках) выполняется командами
+set linesize длина_строки;
+set pagesize количество_строк;
+*/
+
+/*
+Изменение формата времени системы
+От имени system или sys
+*/
+CREATE OR REPLACE
+	TRIGGER on_login_trigger
+AFTER
+	LOGON ON DATABASE
+BEGIN
+	EXECUTE IMMEDIATE 'ALTER SESSION SET NLS_DATE_FORMAT = ''DD.MM.YYYY HH24:MI:SS''';
+END on_login_trigger;
+
+-- для работы необходимо создать пользователя. это делается от имени администратора БД (system или sys);
+
+-- создание пользователя
+CREATE USER rfid IDENTIFIED BY 19230 -- создание пользователя, присвоение логина и пароля
+DEFAULT TABLESPACE users -- определение табличного пространства
+TEMPORARY TABLESPACE temp -- определение временного табличного простанства
+QUOTA unlimited ON users; -- выделение памяти в табличном пространстве
+
+-- наделение пользователя правами
+GRANT connect TO rfid; -- наделение пользователя правом создавать сессию, т.е. подключаться к БД
+GRANT all privileges TO rfid; -- наделение пользователя различными привилегиями (создание таблиц, представлений, функций, процедур, ...)
+
+-- дальнейшие действия выполняются от имени созданного пользователя БД (rfid)
+-- вход от имени пользователя выполняется командой "conn[ect] логин/пароль;"
+
+-- создание таблиц
+
+-- таблица "шкафы"
+
+CREATE TABLE closets
+(
+	c_id          VARCHAR(10),           -- id шкафа
+	c_building    VARCHAR(40)  NOT NULL, -- корпус, в котором он расположен
+	с_floor       NUMBER(2)    NOT NULL, -- этаж, на котором он расположен
+	c_description VARCHAR(500) NOT NULL, -- дополнительная информация, если необходимо
+	
+	CONSTRAINT pk_closets PRIMARY KEY (c_id) -- определение первичного ключа
+);
+
+-- таблица "типы ценностей". справочная таблица. в текущей версии прототипа пока не реализована
+/*
+CREATE TABLE values_types
+(
+	vt_name VARCHAR(40), -- название типа ценностей
+
+	CONSTRAINT pk_valuestypes PRIMARY KEY (vt_name) -- определение первичного ключа
+);
+*/
+
+-- таблица "материальные ценности"
+
+CREATE TABLE material_values
+(
+	mv_id      VARCHAR(20),           -- id ценности
+	-- mv_type VARCHAR(40)  NOT NULL, -- тип ценности
+	mv_dscr    VARCHAR(500) NOT NULL, -- описание ценности
+	mv_closet  VARCHAR(10)  NOT NULL, -- шкаф, в котором она хранится
+
+	CONSTRAINT    pk_materialvalues             PRIMARY KEY (mv_id),                                     -- определение первичного ключа
+	CONSTRAINT    fk_materialvalues_closets     FOREIGN KEY (mv_closet) REFERENCES closets     (c_id)    -- определение внешнего ключа
+	-- CONSTRAINT fk_materialvalues_valuestypes FOREIGN KEY (mv_type)   REFERENCES type_values (vt_name) -- определение внешнего ключа
+);
+
+-- таблица "пользователи"
+
+CREATE TABLE users
+(
+	u_id   VARCHAR(20),          -- id пользователя
+	u_f    VARCHAR(60) NOT NULL, -- фамилия
+	u_io   VARCHAR(60) NOT NULL, -- имя отчество
+	u_post VARCHAR(60) NOT NULL, -- должность
+
+	CONSTRAINT pk_users PRIMARY KEY (u_id) -- определение первичного ключа
+);
+
+/*
+таблица "взятые ценности". важна функционально, т.к. выполняет связь нескольких таблиц.
+мало информативна внешне, для просмотра рекомендуется пользоваться построенным на ее основе представлением
+*/
+
+CREATE TABLE taken_values
+(
+	tv_value  VARCHAR(20) NOT NULL, -- id ценности
+	tv_user   VARCHAR(20) NOT NULL, -- id пользователя
+	tv_take   DATE        NOT NULL, -- время взятия
+	tv_return DATE,                 -- время возврата
+
+	CONSTRAINT fk_takenvalues_materialvalues FOREIGN KEY (tv_value) REFERENCES material_values (mv_id), -- определение внешнего ключа
+	CONSTRAINT fk_takenvalues_users          FOREIGN_KEY (tv_user)  REFERENCES users           (u_id)   -- определение внешнего ключа
+);
+
+-- таблица "посещаемость". важна функционально, мало информативна внешне, для просмотра рекомендуется пользоваться представлением. пока не реализована
+/*
+CREATE TABLE attendance
+(
+	a_user VARCHAR(20) NOT NULL, -- id пользователя
+	a_in   DATE        NOT NULL, -- дата прихода
+	a_out  DATE,                 --дата ухода
+
+	CONSTRAINT fk_attendance_users FOREIGN KEY (a_user) REFERENCES users (u_id)
+);
+*/
+
+-- таблица "исключения". для хранения информации о внештатных ситуациях, ошибках... . пока не реализована. заполняется программно (предположительно, триггерами)
+/*
+CREATE TABLE exceptions
+(
+	e_id   VARCHAR(4)   NOT NULL, --id ошибки. скорее всего, аббревиатура от названия
+	e_name VARCHAR(20)  NOT NULL, -- название ошибки
+	e_dscr VARCHAR(200) NOT NULL  -- подробное описание того, что и где произошло
+);
+*/
+
+-- просмотр информации о структуре таблицы выполняется командой "desc[ribe] имя_таблицы;"
+
+-- создание представлений
+
+/*
+представление "взятые ценности"
+содержит: id пользователя, его фио и должность, id вещи, ее описание и шкаф, в котором она хранится, а также дату-время взятия и возврата
+*/
+CREATE OR REPLACE VIEW
+	takenvalues_info
+AS SELECT
+	u.u_id, u.u_f, u.u_io, u.u_post,
+	mv.mv_id, mv.mv_description, mv.mv_closet,
+	tv.tv_take, tv.tv_return
+FROM
+	users u,
+	material_values mv,
+	taken_values tv
+WHERE
+	u.u_id = tv.tv_user
+	AND
+	mv.mv_id = tv.tv_value
+ORDER BY
+	tv.tv_take DESC;
+
+/*
+представление "посещаемость", пока не реализовано
+содержит: id пользователя, его фио и должность, а также дату-время прихода и ухода
+*/
+/*
+CREATE OR REPLACE VIEW
+	attendance_info
+AS SELECT
+	u.u_id, u.u_f, u.u_io, u.u_post,
+	a.a_in, a.a_out
+FROM
+	users u,
+	attendance a
+WHERE
+	u.u_id = a.a_user
+ORDER BY
+	a.a_in DESC;
+*/
